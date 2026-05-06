@@ -2,12 +2,34 @@ package com.quantitymeasurement;
 
 public class QuantityMeasurementApp {
 
-    public static class Feet {
+    public static class Length {
 
         private final double value;
+        private final LengthUnit unit;
 
-        public Feet(double value) {
+        public enum LengthUnit {
+
+            FEET(12.0),
+            INCHES(1.0);
+
+            private final double conversionFactor;
+
+            LengthUnit(double conversionFactor) {
+                this.conversionFactor = conversionFactor;
+            }
+
+            public double getConversionFactor() {
+                return conversionFactor;
+            }
+        }
+
+        public Length(double value, LengthUnit unit) {
             this.value = value;
+            this.unit = unit;
+        }
+
+        private double convertToBaseUnit() {
+            return value * unit.getConversionFactor();
         }
 
         @Override
@@ -19,32 +41,11 @@ public class QuantityMeasurementApp {
             if (obj == null || getClass() != obj.getClass())
                 return false;
 
-            Feet feet = (Feet) obj;
+            Length length = (Length) obj;
 
-            return Double.compare(feet.value, value) == 0;
-        }
-    }
-
-    public static class Inches {
-
-        private final double value;
-
-        public Inches(double value) {
-            this.value = value;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-
-            if (this == obj)
-                return true;
-
-            if (obj == null || getClass() != obj.getClass())
-                return false;
-
-            Inches inches = (Inches) obj;
-
-            return Double.compare(inches.value, value) == 0;
+            return Double.compare(
+                    this.convertToBaseUnit(),
+                    length.convertToBaseUnit()) == 0;
         }
     }
 }
