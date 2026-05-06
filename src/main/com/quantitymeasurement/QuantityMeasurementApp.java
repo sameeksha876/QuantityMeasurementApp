@@ -5,27 +5,39 @@ public class QuantityMeasurementApp {
     public static void main(String[] args) {
 
         Quantity<LengthUnit> feet =
-                new Quantity<>(1.0, LengthUnit.FEET);
+                new Quantity<>(10.0, LengthUnit.FEET);
 
         Quantity<LengthUnit> inches =
-                new Quantity<>(12.0, LengthUnit.INCHES);
+                new Quantity<>(24.0, LengthUnit.INCHES);
 
-        System.out.println(feet.equals(inches));
+        System.out.println(
+                feet.subtract(inches));
+
+        System.out.println(
+                feet.divide(
+                        new Quantity<>(2.0,
+                                LengthUnit.FEET)));
 
         Quantity<WeightUnit> kilogram =
-                new Quantity<>(1.0, WeightUnit.KILOGRAM);
+                new Quantity<>(5.0,
+                        WeightUnit.KILOGRAM);
 
         Quantity<WeightUnit> gram =
-                new Quantity<>(1000.0, WeightUnit.GRAM);
+                new Quantity<>(1000.0,
+                        WeightUnit.GRAM);
 
-        System.out.println(kilogram.equals(gram));
+        System.out.println(
+                kilogram.subtract(gram));
 
         Quantity<VolumeUnit> litre =
-                new Quantity<>(1.0, VolumeUnit.LITRE);
+                new Quantity<>(5.0,
+                        VolumeUnit.LITRE);
 
         Quantity<VolumeUnit> millilitre =
-                new Quantity<>(1000.0, VolumeUnit.MILLILITRE);
+                new Quantity<>(500.0,
+                        VolumeUnit.MILLILITRE);
 
-        System.out.println(litre.equals(millilitre));
+        System.out.println(
+                litre.subtract(millilitre));
     }
 }
