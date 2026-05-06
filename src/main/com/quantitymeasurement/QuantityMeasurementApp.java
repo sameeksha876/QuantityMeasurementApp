@@ -34,6 +34,16 @@ public class QuantityMeasurementApp {
             return value * unit.getConversionFactor();
         }
 
+        public double convertTo(LengthUnit targetUnit) {
+
+            if (targetUnit == null)
+                throw new IllegalArgumentException("Target unit cannot be null");
+
+            double baseValue = convertToBaseUnit();
+
+            return baseValue / targetUnit.getConversionFactor();
+        }
+
         @Override
         public boolean equals(Object obj) {
 
