@@ -7,31 +7,20 @@ public class QuantityMeasurementApp {
         private final double value;
         private final LengthUnit unit;
 
-        public enum LengthUnit {
-
-            FEET(12.0),
-            INCHES(1.0),
-            YARDS(36.0),
-            CENTIMETERS(0.393701);
-
-            private final double conversionFactor;
-
-            LengthUnit(double conversionFactor) {
-                this.conversionFactor = conversionFactor;
-            }
-
-            public double getConversionFactor() {
-                return conversionFactor;
-            }
-        }
-
         public Length(double value, LengthUnit unit) {
+
+            if (unit == null)
+                throw new IllegalArgumentException("Unit cannot be null");
+
+            if (Double.isNaN(value) || Double.isInfinite(value))
+                throw new IllegalArgumentException("Invalid value");
+
             this.value = value;
             this.unit = unit;
         }
 
         private double convertToBaseUnit() {
-            return value * unit.getConversionFactor();
+            return unit.convertToBaseUnit(value);
         }
 
         public double convertTo(LengthUnit targetUnit) {
@@ -41,7 +30,7 @@ public class QuantityMeasurementApp {
 
             double baseValue = convertToBaseUnit();
 
-            return baseValue / targetUnit.getConversionFactor();
+            return targetUnit.convertFromBaseUnit(baseValue);
         }
 
         public Length add(Length other) {
@@ -54,7 +43,7 @@ public class QuantityMeasurementApp {
                             + other.convertToBaseUnit();
 
             double convertedValue =
-                    totalBaseValue / this.unit.getConversionFactor();
+                    this.unit.convertFromBaseUnit(totalBaseValue);
 
             return new Length(convertedValue, this.unit);
         }
@@ -72,7 +61,7 @@ public class QuantityMeasurementApp {
                             + other.convertToBaseUnit();
 
             double convertedValue =
-                    totalBaseValue / targetUnit.getConversionFactor();
+                    targetUnit.convertFromBaseUnit(totalBaseValue);
 
             convertedValue =
                     Math.round(convertedValue * 100.0) / 100.0;
