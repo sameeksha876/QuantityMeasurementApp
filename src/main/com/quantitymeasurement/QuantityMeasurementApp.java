@@ -44,6 +44,21 @@ public class QuantityMeasurementApp {
             return baseValue / targetUnit.getConversionFactor();
         }
 
+        public Length add(Length other) {
+
+            if (other == null)
+                throw new IllegalArgumentException("Length cannot be null");
+
+            double totalBaseValue =
+                    this.convertToBaseUnit()
+                            + other.convertToBaseUnit();
+
+            double convertedValue =
+                    totalBaseValue / this.unit.getConversionFactor();
+
+            return new Length(convertedValue, this.unit);
+        }
+
         @Override
         public boolean equals(Object obj) {
 
@@ -58,6 +73,11 @@ public class QuantityMeasurementApp {
             return Double.compare(
                     this.convertToBaseUnit(),
                     length.convertToBaseUnit()) == 0;
+        }
+
+        @Override
+        public String toString() {
+            return value + " " + unit;
         }
     }
 }
