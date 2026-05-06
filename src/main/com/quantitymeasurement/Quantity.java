@@ -82,6 +82,63 @@ public class Quantity<U extends IMeasurable> {
         return new Quantity<>(convertedValue, targetUnit);
     }
 
+    public Quantity<U> subtract(Quantity<U> other) {
+
+        if (other == null)
+            throw new IllegalArgumentException("Quantity cannot be null");
+
+        double resultBaseValue =
+                unit.convertToBaseUnit(value)
+                        - other.unit.convertToBaseUnit(other.value);
+
+        double convertedValue =
+                unit.convertFromBaseUnit(resultBaseValue);
+
+        convertedValue =
+                Math.round(convertedValue * 100.0) / 100.0;
+
+        return new Quantity<>(convertedValue, unit);
+    }
+
+    public Quantity<U> subtract(Quantity<U> other,
+                                U targetUnit) {
+
+        if (other == null)
+            throw new IllegalArgumentException("Quantity cannot be null");
+
+        if (targetUnit == null)
+            throw new IllegalArgumentException("Target unit cannot be null");
+
+        double resultBaseValue =
+                unit.convertToBaseUnit(value)
+                        - other.unit.convertToBaseUnit(other.value);
+
+        double convertedValue =
+                targetUnit.convertFromBaseUnit(resultBaseValue);
+
+        convertedValue =
+                Math.round(convertedValue * 100.0) / 100.0;
+
+        return new Quantity<>(convertedValue, targetUnit);
+    }
+
+    public double divide(Quantity<U> other) {
+
+        if (other == null)
+            throw new IllegalArgumentException("Quantity cannot be null");
+
+        double divisor =
+                other.unit.convertToBaseUnit(other.value);
+
+        if (divisor == 0)
+            throw new ArithmeticException("Cannot divide by zero");
+
+        double dividend =
+                unit.convertToBaseUnit(value);
+
+        return dividend / divisor;
+    }
+
     @Override
     public boolean equals(Object obj) {
 
