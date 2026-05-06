@@ -59,6 +59,27 @@ public class QuantityMeasurementApp {
             return new Length(convertedValue, this.unit);
         }
 
+        public Length add(Length other, LengthUnit targetUnit) {
+
+            if (other == null)
+                throw new IllegalArgumentException("Length cannot be null");
+
+            if (targetUnit == null)
+                throw new IllegalArgumentException("Target unit cannot be null");
+
+            double totalBaseValue =
+                    this.convertToBaseUnit()
+                            + other.convertToBaseUnit();
+
+            double convertedValue =
+                    totalBaseValue / targetUnit.getConversionFactor();
+
+            convertedValue =
+                    Math.round(convertedValue * 100.0) / 100.0;
+
+            return new Length(convertedValue, targetUnit);
+        }
+
         @Override
         public boolean equals(Object obj) {
 
