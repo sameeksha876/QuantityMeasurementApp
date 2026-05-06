@@ -19,5 +19,13 @@ public class QuantityMeasurementApp {
                 new Quantity<>(1000.0, WeightUnit.GRAM);
 
         System.out.println(kilogram.equals(gram));
+
+        Quantity<VolumeUnit> litre =
+                new Quantity<>(1.0, VolumeUnit.LITRE);
+
+        Quantity<VolumeUnit> millilitre =
+                new Quantity<>(1000.0, VolumeUnit.MILLILITRE);
+
+        System.out.println(litre.equals(millilitre));
     }
 }
