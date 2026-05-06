@@ -1,5 +1,7 @@
 package com.quantitymeasurement;
 
+import java.util.function.DoubleBinaryOperator;
+
 public class Quantity<U extends IMeasurable> {
 
     private final double value;
@@ -25,6 +27,31 @@ public class Quantity<U extends IMeasurable> {
         return unit;
     }
 
+    private enum ArithmeticOperation {
+
+        ADD((a, b) -> a + b),
+
+        SUBTRACT((a, b) -> a - b),
+
+        DIVIDE((a, b) -> {
+
+            if (b == 0)
+                throw new ArithmeticException("Cannot divide by zero");
+
+            return a / b;
+        });
+
+        private final DoubleBinaryOperator operation;
+
+        ArithmeticOperation(DoubleBinaryOperator operation) {
+            this.operation = operation;
+        }
+
+        public double compute(double a, double b) {
+            return operation.applyAsDouble(a, b);
+        }
+    }
+
     public Quantity<U> convertTo(U targetUnit) {
 
         if (targetUnit == null)
@@ -36,107 +63,108 @@ public class Quantity<U extends IMeasurable> {
         double convertedValue =
                 targetUnit.convertFromBaseUnit(baseValue);
 
-        convertedValue =
-                Math.round(convertedValue * 100.0) / 100.0;
+        convertedValue = roundToTwoDecimals(convertedValue);
 
         return new Quantity<>(convertedValue, targetUnit);
     }
 
     public Quantity<U> add(Quantity<U> other) {
-
-        if (other == null)
-            throw new IllegalArgumentException("Quantity cannot be null");
-
-        double totalBaseValue =
-                unit.convertToBaseUnit(value)
-                        + other.unit.convertToBaseUnit(other.value);
-
-        double convertedValue =
-                unit.convertFromBaseUnit(totalBaseValue);
-
-        convertedValue =
-                Math.round(convertedValue * 100.0) / 100.0;
-
-        return new Quantity<>(convertedValue, unit);
+        return add(other, unit);
     }
 
     public Quantity<U> add(Quantity<U> other,
                            U targetUnit) {
 
-        if (other == null)
-            throw new IllegalArgumentException("Quantity cannot be null");
+        validateArithmeticOperands(other,
+                targetUnit,
+                true);
 
-        if (targetUnit == null)
-            throw new IllegalArgumentException("Target unit cannot be null");
+        double result =
+                performBaseArithmetic(
+                        other,
+                        targetUnit,
+                        ArithmeticOperation.ADD);
 
-        double totalBaseValue =
-                unit.convertToBaseUnit(value)
-                        + other.unit.convertToBaseUnit(other.value);
-
-        double convertedValue =
-                targetUnit.convertFromBaseUnit(totalBaseValue);
-
-        convertedValue =
-                Math.round(convertedValue * 100.0) / 100.0;
-
-        return new Quantity<>(convertedValue, targetUnit);
+        return new Quantity<>(result, targetUnit);
     }
 
     public Quantity<U> subtract(Quantity<U> other) {
-
-        if (other == null)
-            throw new IllegalArgumentException("Quantity cannot be null");
-
-        double resultBaseValue =
-                unit.convertToBaseUnit(value)
-                        - other.unit.convertToBaseUnit(other.value);
-
-        double convertedValue =
-                unit.convertFromBaseUnit(resultBaseValue);
-
-        convertedValue =
-                Math.round(convertedValue * 100.0) / 100.0;
-
-        return new Quantity<>(convertedValue, unit);
+        return subtract(other, unit);
     }
 
     public Quantity<U> subtract(Quantity<U> other,
                                 U targetUnit) {
 
-        if (other == null)
-            throw new IllegalArgumentException("Quantity cannot be null");
+        validateArithmeticOperands(other,
+                targetUnit,
+                true);
 
-        if (targetUnit == null)
-            throw new IllegalArgumentException("Target unit cannot be null");
+        double result =
+                performBaseArithmetic(
+                        other,
+                        targetUnit,
+                        ArithmeticOperation.SUBTRACT);
 
-        double resultBaseValue =
-                unit.convertToBaseUnit(value)
-                        - other.unit.convertToBaseUnit(other.value);
-
-        double convertedValue =
-                targetUnit.convertFromBaseUnit(resultBaseValue);
-
-        convertedValue =
-                Math.round(convertedValue * 100.0) / 100.0;
-
-        return new Quantity<>(convertedValue, targetUnit);
+        return new Quantity<>(result, targetUnit);
     }
 
     public double divide(Quantity<U> other) {
 
+        validateArithmeticOperands(other,
+                null,
+                false);
+
+        return performBaseArithmetic(
+                other,
+                null,
+                ArithmeticOperation.DIVIDE);
+    }
+
+    private void validateArithmeticOperands(
+            Quantity<U> other,
+            U targetUnit,
+            boolean targetUnitRequired) {
+
         if (other == null)
             throw new IllegalArgumentException("Quantity cannot be null");
 
-        double divisor =
-                other.unit.convertToBaseUnit(other.value);
+        if (Double.isNaN(other.value)
+                || Double.isInfinite(other.value))
+            throw new IllegalArgumentException("Invalid value");
 
-        if (divisor == 0)
-            throw new ArithmeticException("Cannot divide by zero");
+        if (!unit.getClass()
+                .equals(other.unit.getClass()))
+            throw new IllegalArgumentException("Cross-category operation not allowed");
 
-        double dividend =
+        if (targetUnitRequired && targetUnit == null)
+            throw new IllegalArgumentException("Target unit cannot be null");
+    }
+
+    private double performBaseArithmetic(
+            Quantity<U> other,
+            U targetUnit,
+            ArithmeticOperation operation) {
+
+        double thisBase =
                 unit.convertToBaseUnit(value);
 
-        return dividend / divisor;
+        double otherBase =
+                other.unit.convertToBaseUnit(other.value);
+
+        double result =
+                operation.compute(thisBase, otherBase);
+
+        if (operation == ArithmeticOperation.DIVIDE)
+            return result;
+
+        double convertedResult =
+                targetUnit.convertFromBaseUnit(result);
+
+        return roundToTwoDecimals(convertedResult);
+    }
+
+    private double roundToTwoDecimals(double value) {
+        return Math.round(value * 100.0) / 100.0;
     }
 
     @Override
